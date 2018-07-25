@@ -1,7 +1,10 @@
 from flask import Flask, render_template, flash, request
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
 
-QUE = ["count chocula"]
+QUE = [
+    {"name": "count chocula", "reason": "Get ceral"},
+    {"name": "Silly Rabit", "reason": "Get Trix"},
+]
 # App config.
 DEBUG = True
 app = Flask(__name__)
@@ -15,20 +18,24 @@ class ReusableForm(Form):
 @app.route("/", methods=['GET', 'POST'])
 def hello():
     form = ReusableForm(request.form)
-
-    print(form.errors)
     if request.method == 'POST':
         name=request.form['name']
-
-        print(name, "Entered into form")
-
         if form.validate():
-            # Save the comment here.
-            QUE.append(name)
+            student = {"name":name, "reason": "stuff"}
+            QUE.append(student)
         else:
             flash('Error: All the form fields are required. ')
+    wait = str(len(QUE)) + " min"
+    return render_template('check_in.html', form=form, que=QUE, wait=wait)
 
-    return render_template('hello.html', form=form, que=QUE)
+@app.route("/advisor", methods=['GET', 'POST'])
+def advisor():
+    form = ReusableForm(request.form)
+    if request.method == 'POST':
+        student = QUE.pop(0)
+        return render_template('advisor.html', form=form, student=student, que=QUE)
+    else:
+        return render_template('advisor.html', form=form, student=None, que=QUE)
 
 if __name__ == "__main__":
     app.run()
