@@ -1,0 +1,4 @@
+requests
+wtforms
+flask
+pytest

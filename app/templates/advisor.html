@@ -234,7 +234,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <h3> {{ student["name"] }}</h3>
     <h4> Reason for Visit </h4>
     <p> {{ student['reason'] }} </p>
-
   <br>
   {% endif %}
     <h2>Current Waitlist</h2>
@@ -245,7 +244,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     {% for name in que %}
       <tr>
         <td>{{ name['name'] }}</td>
-        <td> {{loop.index}} <td>
       </tr>
     {% endfor %}
     </table>
