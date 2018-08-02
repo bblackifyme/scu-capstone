@@ -228,13 +228,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <div id="d.en.326725"><!-- General Content --></div>
 <div id="content-326725">
-
-  {% if student != None %}
-    <h2>Current Student</h2>
-    <h3> {{ student["name"] }}</h3>
-    <h4> Reason for Visit </h4>
-    <p> {{ student['reason'] }} </p>
-  <br>
+  {% if not g.user %}
+    <a class="p-2 text-dark" href="/login">Log In / Register</a>
+  {% else %}
+  <h1> Welcome {{ g.user.profile.firstName }} </h1>
+    {% if student != None %}
+      <h2>Current Student</h2>
+      <h3> {{ student["name"] }}</h3>
+      <h4> Reason for Visit </h4>
+      <p> {{ student['reason'] }} </p>
+    <br>
+    {% endif %}
   {% endif %}
     <h2>Current Waitlist</h2>
     <table>
