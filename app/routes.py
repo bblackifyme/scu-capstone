@@ -1,10 +1,11 @@
-from flask import Flask, render_template, flash, request, g
-from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
+from flask import Flask, render_template, flash, request, g, redirect
+from wtforms import Form, TextField, IntegerField, TextAreaField, validators, StringField, SubmitField
 from flask_oidc import OpenIDConnect
 from okta import UsersClient
+from code_db import CodeSystem
 okta_client = UsersClient("https://dev-505726.oktapreview.com/", "00HEKJlOz4Wpxb_IZMNplxxapvwQJyvhcZCp1FI9uB")
 
-
+CODE_DB = CodeSystem()
 QUE = [
     {"name": "count chocula", "reason": "Get coco ceral"},
     {"name": "Silly Rabit", "reason": "Get Trix"},
@@ -32,6 +33,11 @@ class ReusableForm(Form):
     name = TextField('Name:', validators=[validators.required()])
     reason = TextField('Reason for visit:', validators=[validators.required()])
 
+class OptCodeForm(Form):
+    code = IntegerField('Workshop Code:')
+
+class NewCodeForm(Form):
+    uses = IntegerField('Number of Uses')
 
 @app.route("/", methods=['GET', 'POST'])
 def check_in():
@@ -59,6 +65,49 @@ def advisor():
         return render_template('advisor.html', form=form, student=student, que=QUE)
     else:
         return render_template('advisor.html', form=form, student=None, que=QUE)
+
+@app.route("/appointment", methods=['GET', 'POST'])
+@oidc.require_login
+def appointments():
+    "appointment system. validates that a user has gone to opt appointment"
+    if g.user.profile.email in CODE_DB:
+        return redirect('https://calendar.google.com/calendar/selfsched?sstoken=UUxrUmkyT1FMUXMxfGRlZmF1bHR8YzBkYWVkZGQ4Njk1ZmMyMzc2YzlkMjU4ZDBlMzU2YzM')
+    if request.method == 'POST':
+        code = int(request.form['code'])
+        print(code)
+        valid = CODE_DB.check_code_validity(code, g.user.profile.email)
+        print(valid)
+        if valid:
+            return redirect('https://calendar.google.com/calendar/selfsched?sstoken=UUxrUmkyT1FMUXMxfGRlZmF1bHR8YzBkYWVkZGQ4Njk1ZmMyMzc2YzlkMjU4ZDBlMzU2YzM')
+    form = OptCodeForm(request.form)
+    return render_template('opt_workshop.html', form=form)
+
+@app.route("/appointment/admin", methods=['GET', 'POST'])
+@oidc.require_login
+def appointments_admin():
+    "appointment system. generate a code"
+    if request.method == 'POST':
+        uses = int(request.form['uses'])
+        code = CODE_DB.add_code(limit=uses)
+    else:
+        code = None
+    form = OptCodeForm(request.form)
+    return render_template('code_generator.html', form=form, code=code)
+
+
+@app.route("/appointment/admin/codes", methods=['GET', 'POST'])
+@oidc.require_login
+def appointments_admin_codes():
+    "appointment system. View codes"
+    codes  = []
+    for record in CODE_DB:
+        print(CODE_DB[record])
+        if CODE_DB[record] is True:
+            pass
+        elif 'limit' in CODE_DB[record]:
+            CODE_DB[record].update({'code':record})
+            codes.append(CODE_DB[record])
+    return render_template('view_codes.html', codes=codes)
 
 if __name__ == "__main__":
     app.run()

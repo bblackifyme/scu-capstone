@@ -36,3 +36,5 @@ Client ID: 0oaftfihm15Quy64I0h7
 Client Secret: G-T_UlkePqi3tTzYkqYAENjTijLCxntkJIH2shYF
 
 dev token: 00HEKJlOz4Wpxb_IZMNplxxapvwQJyvhcZCp1FI9uB
+
+OKTA guide: https://developer.okta.com/blog/2018/07/12/flask-tutorial-simple-user-registration-and-login
