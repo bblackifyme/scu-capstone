@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# App specific 
+*.log
+advisors.json
+code_db2.json
+
 # C extensions
 *.so
 
