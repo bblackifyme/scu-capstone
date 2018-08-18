@@ -221,41 +221,31 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <div class="container" id="content">
       <div class="row">
         <div class="col-sm-8">
-          <h1 class="page-title" id="page-title">OPT Appointment - Workshop</h1>
+          <h1 class="page-title" id="page-title">ISS Drop-In System</h1>
           <ol class="breadcrumb">
   <li class="breadcrumb-item"><a href="/">Home</a></li><li class="breadcrumb-item"><a href="/globalengagement/">Global Engagement</a></li><li class="breadcrumb-item"><a href="/globalengagement/about/">About</a></li><li class="breadcrumb-item">ISS Appointment System  </li>
 </ol>
 
 <div id="d.en.326725"><!-- General Content --></div>
 <div id="content-326725">
-
+  <table>
+    <tr>
+      <th> Administrator email </th>
+   </tr>
+  {% for advisor in advisors %}
+    <tr>
+      <td>{{ advisor }}</td>
+    </tr>
+  {% endfor %}
+  </table>
   <form  action="" method="post" role="form">
     {{ form.csrf }}
     <div class="form-group">
-      <label for="name">Enter your workshop code:</label>
-      <input type="text" class="form-control" id="code" name="code" placeholder="workshop code">
+      <label for="advisor">Add an Administrator:</label>
+      <input type="text" class="form-control" id="advisor" name="advisor" placeholder="Admin email">
     </div>
-    <button type="submit" class="btn btn-success">Enter Code</button>
+    <button type="submit" class="btn btn-success">Add</button>
   </form>
-
-</h4><br>
-<h3>Or you will have 2 hours to watch this workshop.</h3>
-<p style="color:red"> You will only be able to proceed to the next step when you finish watching.</p>
-<div class="two-column video module"><div class="embed-responsive embed-responsive-16by9">
-<iframe id="workshop" class='embed-responsive-item' width='560' height='315' src='https://www.youtube.com/embed/1cDQu2BesnU?showinfo=0' frameborder='0' allowfullscreen></iframe></div></div>
-<h2>Checklist</h2>
-<ul>
-  <li>Enrolled in the appropriate CPT course</li>
-  <li>Completed the CPT Cooperative Agreement Form and signed by your academic advisor</li>
-  <li>Enrolled full-time for the applicable term unless you have a completed Reduced Course Load form or Thesis/Capstone Confirmation form filed</li>
-</ul>
-
-<p style="color:red">Attention: You should have everything ready before making this appointment, or else it will be canceled in person.</p>
-<button id='next' type = "button" class=".btn btn-primary"  style= "display:none" onclick="window.location.href='CPT_Checklist.html'">Next Step</button>
-
-
-<script>setTimeout(function(){ $("#next").show(); }, 120000);</script>
-
 </div>
 
 <div class="row">
@@ -306,7 +296,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <div class="row">
               <div class="col-sm-2 col-sm-push-5 footer-mission">
                 <div class="footer-mission-wrapper">
-                  <!-- <img class="hide-for-retina" src="/media/scuedu/style-assets/stylesheets/css-assets/footer-mission.png" width="100" height="109" alt="SCU Mission icon"> -->
+                  <img class="hide-for-retina" src="/media/scuedu/style-assets/stylesheets/css-assets/footer-mission.png" width="100" height="109" alt="SCU Mission icon">
                   <img class="retina-only" src="/media/scuedu/style-assets/stylesheets/css-assets/footer-mission@2x.png" width="100" height="109" alt="SCU Mission icon">
                 </div>
               </div>

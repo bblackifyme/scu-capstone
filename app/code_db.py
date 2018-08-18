@@ -18,6 +18,7 @@ class CodeDB(dict):
 
 		If no file is present the path is set to /temp/codedb.json
 		"""
+		CodeDB.file = 'codedb2.json'
 		if file:
 			try:
 				CodeDB.file = file
@@ -26,10 +27,8 @@ class CodeDB(dict):
 				dict.__init__(self, previous_db)
 				return None
 
-			except ValueError:
-				pass
-
-		CodeDB.file = 'codedb2.json'
+			except IOError:
+				CodeDB.file = file
 		with open(CodeDB.file, 'w+') as f:
 			json.dump({}, f)
 
