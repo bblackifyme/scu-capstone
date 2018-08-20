@@ -246,7 +246,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       <label for="name">Name:</label>
       <input type="text" class="form-control" id="name" name="name" placeholder="What's your name?">
       <label for="reason">Reason for Visit:</label>
-      <input type="text" class="form-control" id="reason" name="reason" placeholder="Reason for your visit?">
+      <!-- <input type="text" class="form-control" id="reason" name="reason" placeholder="Reason for your visit?"> -->
+      <select type="text" class="form-control" id="reason" name="reason">
+        <option value="Travel Signature">Travel Signature</option>
+        <option value="Status Change">Status Change</option>
+        <option value="CPT/OPT Related">CPT/OPT Related</option>
+        <option value="OPT Review">OPT Review</option>
+        <option value="Probation">Probation</option>
+        <option value="Reduce Course Load">Reduce Course Load</option>
+        <option value="Other">Other</option>
+      </select>
     </div>
     <button type="submit" class="btn btn-success">Sign In</button>
   </form>

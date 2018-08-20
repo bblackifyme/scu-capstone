@@ -13,6 +13,8 @@ okta_client = UsersClient("https://dev-505726.oktapreview.com/", "00HEKJlOz4Wpxb
 
 CODE_DB = CodeSystem("codedb2.json")
 ADIVSOR_DB = CodeSystem("advisors.json")
+REASONS_COUNTER = CodeSystem("reasons.json")
+WEEKS_COUNTER = CodeSystem("weeks_reasons.json")
 QUE = []
 QUE_LOGGER = Logger(filename="que_logs.log")
 QUE_SEEN_LOGGER = Logger(filename="que_seen_logs.log")
@@ -84,6 +86,12 @@ def check_in():
         reason = request.form['reason']
         QUE_LOGGER.info("%s checked in for %s" %(name, reason))
         if form.validate():
+            if reason not in REASONS_COUNTER:
+                REASONS_COUNTER.update({reason:0})
+            if reason not in WEEKS_COUNTER:
+                WEEKS_COUNTER.update({reason:0})
+            REASONS_COUNTER.update({reason:REASONS_COUNTER[reason]+1})
+            WEEKS_COUNTER.update({reason:WEEKS_COUNTER[reason]+1})
             student = {"name":name, "reason": reason}
             QUE.append(student)
         else:
@@ -176,7 +184,7 @@ def manage_admin():
 @oidc.require_login
 def admin_stats():
     "Return the admin landing page"
-    return render_template('stat.html')
+    return render_template('stat.html', weeks=WEEKS_COUNTER, years=REASONS_COUNTER)
 
 @app.route("/admin/code_generator", methods=['GET', 'POST'])
 @oidc.require_login
