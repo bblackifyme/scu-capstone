@@ -7,6 +7,8 @@ __pycache__/
 *.log
 advisors.json
 code_db2.json
+weeks_reasons.json
+reasons.json
 
 # C extensions
 *.so
