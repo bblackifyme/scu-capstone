@@ -2,9 +2,12 @@ from flask import Flask, render_template, flash, request, g, redirect
 from wtforms import Form, TextField, IntegerField, TextAreaField, validators, StringField, SubmitField
 from flask_oidc import OpenIDConnect
 from okta import UsersClient
+from datetime import datetime
+from collections import Counter
 
 # local imports
 from code_db import CodeSystem
+from code_db import CodeDB
 from opt_logger import Logger, datetime
 
 # Configuration
@@ -14,7 +17,9 @@ okta_client = UsersClient("https://dev-505726.oktapreview.com/", "00HEKJlOz4Wpxb
 CODE_DB = CodeSystem("codedb2.json")
 ADIVSOR_DB = CodeSystem("advisors.json")
 REASONS_COUNTER = CodeSystem("reasons.json")
-WEEKS_COUNTER = CodeSystem("weeks_reasons.json")
+REASONS_COUNTER.start = datetime.now().month
+WEEKS_COUNTER = CodeDB("weeks_reasons.json")
+WEEKS_COUNTER.start = datetime.now().day
 QUE = []
 QUE_LOGGER = Logger(filename="que_logs.log")
 QUE_SEEN_LOGGER = Logger(filename="que_seen_logs.log")
@@ -30,6 +35,16 @@ app.config["OIDC_CALLBACK_ROUTE"] = "/oidc/callback"
 app.config["OIDC_SCOPES"] = ["openid", "email", "profile"]
 app.config['SECRET_KEY'] = '7d441f27d441f27567d441f2b6176a'
 oidc = OpenIDConnect(app)
+
+
+def clear_dbs():
+    today = datetime.now()
+    if (WEEKS_COUNTER.start + 7) > today.day:
+        WEEKS_COUNTER.clear()
+        WEEKS_COUNTER.start = today.day
+    if REASONS_COUNTER.start == today:
+        REASONS_COUNTER.clear()
+        REASONS_COUNTER.start = today.month
 
 
 ### JUNK FOR TESTING
@@ -80,6 +95,7 @@ def landing():
 
 @app.route("/drop_in", methods=['GET', 'POST'])
 def check_in():
+
     form = ReusableForm(request.form)
     if request.method == 'POST':
         name = request.form['name']
@@ -184,6 +200,7 @@ def manage_admin():
 @oidc.require_login
 def admin_stats():
     "Return the admin landing page"
+    clear_dbs()
     return render_template('stat.html', weeks=WEEKS_COUNTER, years=REASONS_COUNTER)
 
 @app.route("/admin/code_generator", methods=['GET', 'POST'])
@@ -224,6 +241,24 @@ def logs_display():
 
 
 
+#######################################################
+##                    API ROUTES                     ##
+#######################################################
+
+@app.route("/api", methods=['GET'])
+def api_menu():
+    "Return the API option"
+    options = [
+    "appointment_stats",
+    "drop_in_stats",
+    ]
+    return str(options)
+
+@app.route("/api/drop_in_stats", methods=['GET'])
+def api_drop_in():
+    "Return the drop in statistics"
+
+    return str(WEEKS_COUNTER)
 
 if __name__ == "__main__":
     app.run()

@@ -18,24 +18,24 @@ class CodeDB(dict):
 
 		If no file is present the path is set to /temp/codedb.json
 		"""
-		CodeDB.file = 'codedb2.json'
+		self.file = 'codedb2.json'
 		if file:
 			try:
-				CodeDB.file = file
+				self.file = file
 				with open(file, 'r') as f:
 					previous_db = json.load(f)
 				dict.__init__(self, previous_db)
 				return None
 
 			except IOError:
-				CodeDB.file = file
-		with open(CodeDB.file, 'w+') as f:
+				self.file = file
+		with open(self.file, 'w+') as f:
 			json.dump({}, f)
 
 	def __delitem__(self, item):
 		"delete from json file on delete"
 		dict.__delitem__(self, item)
-		with open(CodeDB.file, 'w') as f:
+		with open(self.file, 'w') as f:
 			json.dump(self, f)
 
 	def update(self, new_dict):
@@ -44,11 +44,11 @@ class CodeDB(dict):
 		# Update DB
 		dict.update(self, new_dict)
 
-		with open(CodeDB.file, 'w') as f:
+		with open(self.file, 'w') as f:
 			json.dump(self, f)
 
 	def _get_db_raw(self):
-		with open(CodeDB.file, 'r') as f:
+		with open(self.file, 'r') as f:
 			db = json.load(f)
 			return db
 
