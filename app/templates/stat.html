@@ -56,7 +56,13 @@
       <script src="/media/scuedu/style-assets/javascript/html5shiv.min.js"></script>
       <script src="/media/scuedu/style-assets/javascript/respond.min.js"></script>
     <![endif]-->
-
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
 
   </head>
   <body>
@@ -229,7 +235,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div id="d.en.326725"><!-- General Content --></div>
 <div id="content-326725">
   <h4>Current Week</h4>
-  <table class="table table-striped">
+  <script>
+  $(document).ready(function() {
+    $('#current_week').DataTable( {
+        dom: 'Bfrtip',
+        buttons: [
+            'excelHtml5',
+            'csvHtml5',
+            'pdfHtml5'
+        ]
+    } );
+} );
+</script>
+
+  <table id ="current_week"class="table table-striped">
      <thead>
        <tr>
          <th>Travel Signature</th>
@@ -340,7 +359,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <div class="row">
               <div class="col-sm-2 col-sm-push-5 footer-mission">
                 <div class="footer-mission-wrapper">
-                  <!-- <img class="hide-for-retina" src="/media/scuedu/style-assets/stylesheets/css-assets/footer-mission.png" width="100" height="109" alt="SCU Mission icon"> 
+                  <!-- <img class="hide-for-retina" src="/media/scuedu/style-assets/stylesheets/css-assets/footer-mission.png" width="100" height="109" alt="SCU Mission icon">
                   <img class="retina-only" src="/media/scuedu/style-assets/stylesheets/css-assets/footer-mission@2x.png" width="100" height="109" alt="SCU Mission icon"> -->
                 </div>
               </div>
