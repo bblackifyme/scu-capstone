@@ -74,6 +74,7 @@ class CodeSystem(CodeDB):
 	def check_code_validity(self, code, user):
 		if code in self:
 			new_record = self.__getitem__(code)
+			print self[code]['valid']
 			if self[code]['valid'] is True:
 				self[code]['uses'] += 1
 				self[code]['users'].append(user)
@@ -110,7 +111,7 @@ if __name__ == "__main__":
 	assert 'new2' in db
 
 	# Validate update is written to db file
-	with open(CodeDB.file, 'r') as f:
+	with open(db.file, 'r') as f:
 			live = json.load(f)
 			assert type(live) is dict
 			assert 'new' in live
@@ -120,7 +121,7 @@ if __name__ == "__main__":
 	del db
 
 	# Create teh new db witha. path
-	db = CodeDB(file=CodeDB.file)
+	db = CodeDB(file=db.file)
 
 	# Assert the previous data is present
 	assert 'new' in db

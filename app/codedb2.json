@@ -1,1 +1,1 @@
-{"73554": {"limit": 5, "valid": true, "uses": 0, "users": []}, "97731": {"uses": 0, "valid": true, "limit": 5, "users": []}}
+{"16947": {"uses": 0, "valid": true, "limit": 3, "users": []}, "users": {}, "roles": {"GSA": {"sub_roles": []}, "admin": {"sub_roles": ["GSA"]}, "super_admin": {"sub_roles": ["admin"]}}}

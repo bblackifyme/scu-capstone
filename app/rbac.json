@@ -1,0 +1,1 @@
+{"users": {}, "roles": {"GSA": {"sub_roles": []}, "admin": {"sub_roles": ["advisor"]}, "advisor": {"sub_roles": ["GSA"]}}}

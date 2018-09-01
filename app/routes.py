@@ -4,26 +4,41 @@ from flask_oidc import OpenIDConnect
 from okta import UsersClient
 from datetime import datetime
 from collections import Counter
+import config
+import thread
 
 # local imports
 from code_db import CodeSystem
 from code_db import CodeDB
 from opt_logger import Logger, datetime
+from rbac import RbacSystem
 
 # Configuration
-okta_client = UsersClient("https://dev-505726.oktapreview.com/", "00HEKJlOz4Wpxb_IZMNplxxapvwQJyvhcZCp1FI9uB")
+okta_client = UsersClient(config.okta['account'], config.okta['token'])
 
 
 CODE_DB = CodeSystem("codedb2.json")
 ADIVSOR_DB = CodeSystem("advisors.json")
+
 REASONS_COUNTER = CodeSystem("reasons.json")
 REASONS_COUNTER.start = datetime.now().month
 WEEKS_COUNTER = CodeDB("weeks_reasons.json")
 WEEKS_COUNTER.start = datetime.now().day
+
 QUE = []
+
 QUE_LOGGER = Logger(filename="que_logs.log")
+CODE_LOGGER = Logger(filename="code_logs.log")
+RBAC_LOGGER = Logger(filename="rbac_logs.log")
 QUE_SEEN_LOGGER = Logger(filename="que_seen_logs.log")
 WS_LOGGER = Logger(filename="workshop_logs.log")
+
+RBAC= RbacSystem("rbac.json")
+RBAC.add_role('GSA')
+RBAC.add_role('advisor', sub_roles=['GSA'])
+RBAC.add_role('admin', sub_roles=['advisor'])
+RBAC.add_user('bblack@scu.edu', 'admin')
+
 # App config.
 DEBUG = True
 app = Flask(__name__)
@@ -46,9 +61,14 @@ def clear_dbs():
         REASONS_COUNTER.clear()
         REASONS_COUNTER.start = today.month
 
+def nightly_purge():
+    import time
+    while True:
+        time.sleep(360)
+        if datetime.now().hour == 20:
+            QUE = []
 
-### JUNK FOR TESTING
-ADIVSOR_DB.update({'bblack@scu.edu':'Brandon'})
+thread.start_new_thread(nightly_purge, ())
 
 
 #######################################################
@@ -70,6 +90,9 @@ class NewCodeForm(Form):
     uses = IntegerField('Number of Uses')
 
 class adminForm(Form):
+    advisor = TextField('Advisor Email')
+
+class adminRemoveForm(Form):
     advisor = TextField('Advisor Email')
 
 def check_rbac(email):
@@ -118,18 +141,20 @@ def check_in():
 @app.route("/drop_in/advisor", methods=['GET', 'POST'])
 @oidc.require_login
 def advisor():
-    form = ReusableForm(request.form)
-    if request.method == 'POST':
-        if len(QUE) > 0:
-            student = QUE.pop(0)
-            QUE_LOGGER.info("%s checked out by %s" % (student['name'], g.user.profile.email))
-            msg = "%s,%s,%s,%s" % (datetime.now().date(), student['name'], student['reason'], g.user.profile.email)
-            QUE_SEEN_LOGGER.raw(msg)
+    if RBAC.check_access(g.user.profile.email, 'advisor'):
+        form = ReusableForm(request.form)
+        if request.method == 'POST':
+            if len(QUE) > 0:
+                student = QUE.pop(0)
+                QUE_LOGGER.info("%s checked out by %s" % (student['name'], g.user.profile.email))
+                msg = "%s,%s,%s,%s" % (datetime.now().date(), student['name'], student['reason'], g.user.profile.email)
+                QUE_SEEN_LOGGER.raw(msg)
+            else:
+                student = None
+            return render_template('advisor.html', form=form, student=student, que=QUE)
         else:
-            student = None
-        return render_template('advisor.html', form=form, student=student, que=QUE)
-    else:
-        return render_template('advisor.html', form=form, student=None, que=QUE)
+            return render_template('advisor.html', form=form, student=None, que=QUE)
+    render_template('main_page.html')
 
 
 #######################################################
@@ -147,8 +172,9 @@ def opt_workshop():
     if g.user.profile.email in CODE_DB:
         return redirect('https://calendar.google.com/calendar/selfsched?sstoken=UUxrUmkyT1FMUXMxfGRlZmF1bHR8YzBkYWVkZGQ4Njk1ZmMyMzc2YzlkMjU4ZDBlMzU2YzM')
     if request.method == 'POST':
-        code = int(request.form['code'])
+        code = int(request.form['code']) 
         valid = CODE_DB.check_code_validity(code, g.user.profile.email)
+        CODE_LOGGER.info(g.user.profile.email+"entered OPT code "+ str(code)+ " status was "+ str(valid))
         if valid:
             return redirect('https://calendar.google.com/calendar/selfsched?sstoken=UUxrUmkyT1FMUXMxfGRlZmF1bHR8YzBkYWVkZGQ4Njk1ZmMyMzc2YzlkMjU4ZDBlMzU2YzM')
     form = OptCodeForm(request.form)
@@ -163,6 +189,7 @@ def cpt_workshop():
     elif request.method == 'POST':
         code = int(request.form['code'])
         valid = CODE_DB.check_code_validity(code, g.user.profile.email)
+        CODE_LOGGER.info(g.user.profile.email+"entered CPT code "+ str(code)+ " status was "+ str(valid))
         if valid:
             return redirect('https://calendar.google.com/calendar/selfsched?sstoken=UUxrUmkyT1FMUXMxfGRlZmF1bHR8YzBkYWVkZGQ4Njk1ZmMyMzc2YzlkMjU4ZDBlMzU2YzM')
     form = OptCodeForm(request.form)
@@ -178,7 +205,9 @@ def cpt_workshop():
 @oidc.require_login
 def admin():
     "Return the admin landing page"
-    if check_rbac(g.user.profile.email):
+    print g.user.profile.email
+    print RBAC.check_access(g.user.profile.email, 'advisor')
+    if RBAC.check_access(g.user.profile.email, 'GSA'):
         return render_template('admin_front_page.html')
     else:
         return render_template('main_page.html')
@@ -186,58 +215,78 @@ def admin():
 @app.route("/admin/manage", methods=['GET', 'POST'])
 @oidc.require_login
 def manage_admin():
-    "Manage admin / advisors students"
-    if check_rbac(g.user.profile.email):
-        form = adminForm(request.form)
+    "Manage admin / advisors accounts"
+    form = adminForm(request.form)
+    removeForm = adminRemoveForm(request.form)
+    if RBAC.check_access(g.user.profile.email, 'admin'):
+
         if request.method == 'POST':
-            ADIVSOR_DB.update({request.form['advisor']:"admin"})
+            if 'advisor' in request.form:
+                RBAC_LOGGER.info(g.user.profile.email+ " added admin: " + request.form['advisor'])
+                ADIVSOR_DB.update({request.form['advisor']:"admin"})
+            else:
+                try:
+                    del ADIVSOR_DB[request.form['to_remove']]
+                    RBAC_LOGGER.info(g.user.profile.email+ " removed admin: " + request.form['to_remove'])
+                except:
+                    pass
         advisors = [advisor for advisor in ADIVSOR_DB]
-        return render_template('advisors.html', form=form, advisors=advisors)
+        return render_template('advisors.html', form=form, remove_form=removeForm, advisors=advisors)
     else:
-        return render_template('main_page.html')
+        return render_template('admin_front_page.html')
 
 @app.route("/admin/stats", methods=['GET'])
 @oidc.require_login
 def admin_stats():
     "Return the admin landing page"
     clear_dbs()
-    return render_template('stat.html', weeks=WEEKS_COUNTER, years=REASONS_COUNTER)
+    if RBAC.check_access(g.user.profile.email, 'GSA'):
+        return render_template('stat.html', weeks=WEEKS_COUNTER, years=REASONS_COUNTER)
+    else:
+        return render_template('admin_front_page.html')
 
 @app.route("/admin/code_generator", methods=['GET', 'POST'])
 @oidc.require_login
 def appointments_admin():
     "appointment system. generate a code"
-    if request.method == 'POST':
-        uses = int(request.form['uses'])
-        code = CODE_DB.add_code(limit=uses)
-    else:
-        code = None
-    form = OptCodeForm(request.form)
-    return render_template('code_generator.html', form=form, code=code)
+    if RBAC.check_access(g.user.profile.email, 'advisor'):
+        if request.method == 'POST':
+            uses = int(request.form['uses'])
+            code = CODE_DB.add_code(limit=uses)
+            CODE_LOGGER.info(g.user.profile.email+" generated code "+str(code)+" with "+str(uses)+" uses")
+        else:
+            code = None
+        form = OptCodeForm(request.form)
+        return render_template('code_generator.html', form=form, code=code)
+    return render_template('admin_front_page.html')
 
 
 @app.route("/admin/active_code", methods=['GET', 'POST'])
 @oidc.require_login
 def appointments_admin_codes():
     "appointment system. View codes"
-    codes  = []
-    for record in CODE_DB:
-        print(CODE_DB[record])
-        if CODE_DB[record] is True:
-            pass
-        elif 'limit' in CODE_DB[record]:
-            CODE_DB[record].update({'code':record})
-            codes.append(CODE_DB[record])
-    return render_template('view_codes.html', codes=codes)
+    if RBAC.check_access(g.user.profile.email, 'GSA'):
+        codes  = []
+        for record in CODE_DB:
+            print(CODE_DB[record])
+            if CODE_DB[record] is True:
+                pass
+            elif 'limit' in CODE_DB[record]:
+                CODE_DB[record].update({'code':record})
+                codes.append(CODE_DB[record])
+        return render_template('view_codes.html', codes=codes)
+    return render_template('admin_front_page.html')
 
 @app.route("/admin/log_mgmt", methods=['GET'])
 @oidc.require_login
 def logs_display():
     "Display the logs of System Check-In"
-    records = QUE_SEEN_LOGGER.load()
-    records.reverse()
-    records = [record.split(',') for record in records]
-    return render_template('log_mgmt.html', records=records)
+    if RBAC.check_access(g.user.profile.email, 'GSA'):
+        records = QUE_SEEN_LOGGER.load()
+        records.reverse()
+        records = [record.split(',') for record in records]
+        return render_template('log_mgmt.html', records=records)
+    return render_template('admin_front_page.html')
 
 
 
