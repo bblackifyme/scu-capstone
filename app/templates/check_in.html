@@ -233,10 +233,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       <th> Name </th>
       <th> Estimated Wait <th>
    </tr>
-  {% for name in que %}
+  {% for student in que %}
     <tr>
-      <td>{{ name['name'] }}</td>
-      <td> {{loop.index}} <td>
+      <td>{{ student.name }}</td>
+      <td> {{student.est_wait}} <td>
     </tr>
   {% endfor %}
   </table>

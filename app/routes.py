@@ -12,6 +12,7 @@ from code_db import CodeSystem
 from code_db import CodeDB
 from opt_logger import Logger, datetime
 from rbac import RbacSystem
+from waittime import WaitQue, Visitor
 
 # Configuration
 okta_client = UsersClient(config.okta['account'], config.okta['token'])
@@ -25,7 +26,7 @@ REASONS_COUNTER.start = datetime.now().month
 WEEKS_COUNTER = CodeDB("weeks_reasons.json")
 WEEKS_COUNTER.start = datetime.now().day
 
-QUE = []
+QUE = WaitQue()
 
 QUE_LOGGER = Logger(filename="que_logs.log")
 CODE_LOGGER = Logger(filename="code_logs.log")
@@ -120,6 +121,7 @@ def landing():
 def check_in():
 
     form = ReusableForm(request.form)
+    wait = ""
     if request.method == 'POST':
         name = request.form['name']
         reason = request.form['reason']
@@ -131,12 +133,11 @@ def check_in():
                 WEEKS_COUNTER.update({reason:0})
             REASONS_COUNTER.update({reason:REASONS_COUNTER[reason]+1})
             WEEKS_COUNTER.update({reason:WEEKS_COUNTER[reason]+1})
-            student = {"name":name, "reason": reason}
-            QUE.append(student)
+            student = Visitor(name ,reason)
+            wait = QUE.add(student)
         else:
             flash('Error: All the form fields are required. ')
-    wait = str(len(QUE)) + " min"
-    return render_template('check_in.html', form=form, que=QUE, wait=wait)
+    return render_template('check_in.html', form=form, que=QUE)
 
 @app.route("/drop_in/advisor", methods=['GET', 'POST'])
 @oidc.require_login
@@ -145,9 +146,10 @@ def advisor():
         form = ReusableForm(request.form)
         if request.method == 'POST':
             if len(QUE) > 0:
-                student = QUE.pop(0)
-                QUE_LOGGER.info("%s checked out by %s" % (student['name'], g.user.profile.email))
-                msg = "%s,%s,%s,%s" % (datetime.now().date(), student['name'], student['reason'], g.user.profile.email)
+                student = QUE.get_next()
+
+                QUE_LOGGER.info("%s checked out by %s" % (student.name, g.user.profile.email))
+                msg = "%s,%s,%s,%s" % (datetime.now().date(), student.name, student.reason, g.user.profile.email)
                 QUE_SEEN_LOGGER.raw(msg)
             else:
                 student = None

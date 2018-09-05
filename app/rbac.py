@@ -23,6 +23,11 @@ class RbacSystem(CodeDB):
 
 		self['users'].update({user:[role]})
 
+	def remove_user(self, user):
+		"remove a user from the system"
+		if user in self['users']:
+			del self['users'][user]
+
 	def grant_user(self, user, role):
 		"grant a user access to a role"
 		self['users'][user].append(role)

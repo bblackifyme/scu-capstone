@@ -1,1 +1,1 @@
-{"16947": {"uses": 0, "valid": true, "limit": 3, "users": []}, "users": {}, "roles": {"GSA": {"sub_roles": []}, "admin": {"sub_roles": ["GSA"]}, "super_admin": {"sub_roles": ["admin"]}}}
+{"16947": {"limit": 3, "valid": true, "uses": 0, "users": []}, "87798": {"uses": 1, "valid": false, "limit": 1, "users": ["bblack@scu.edu"]}, "bblack@scu.edu": true, "users": {}, "roles": {"GSA": {"sub_roles": []}, "admin": {"sub_roles": ["GSA"]}, "super_admin": {"sub_roles": ["admin"]}}}

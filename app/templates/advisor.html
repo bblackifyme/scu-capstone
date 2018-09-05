@@ -234,9 +234,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <h1> Welcome {{ g.user.profile.firstName }} </h1>
     {% if student != None %}
       <h2>Current Student</h2>
-      <h3> {{ student["name"] }}</h3>
+      <h3> {{ student.name }}</h3>
       <h4> Reason for Visit </h4>
-      <p> {{ student['reason'] }} </p>
+      <p> {{ student.reason }} </p>
     <br>
     {% endif %}
   {% endif %}
@@ -247,7 +247,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      </tr>
     {% for name in que %}
       <tr>
-        <td>{{ name['name'] }}</td>
+        <td>{{ name.name }}</td>
       </tr>
     {% endfor %}
     </table>

@@ -18,11 +18,14 @@ class WaitQue(list):
 		que_time = self._get_total_wait()
 		if self.seen:
 			seen_remaining = self._seen_time_remaining()
-			WaitQue._sec_to_min(que_time + seen_remaining)
+			wait = WaitQue._sec_to_min(que_time + seen_remaining)
+			visitor.est_wait = wait
 		if len(self) == 0:
-			WaitQue._sec_to_min(0)
-		return WaitQue._sec_to_min(que_time)
-		
+			wait = WaitQue._sec_to_min(0)
+			visitor.est_wait = wait
+		wait = WaitQue._sec_to_min(que_time)
+		visitor.est_wait = wait
+		return wait
 
 	def get_next(self):
 		next = self.pop(0)
@@ -62,7 +65,7 @@ class WaitQue(list):
 		return waits[reason]
 
 	def _get_total_wait(self):
-		return self._min_to_sec(sum([WaitQue._get_reason_wait(student.reason) for student in self]))
+		return sum([WaitQue._get_reason_wait(student.reason) for student in self])
 	@classmethod
 	def _min_to_sec(self, mini):
 		return mini * 60
@@ -70,6 +73,14 @@ class WaitQue(list):
 	@classmethod
 	def _sec_to_min(self, sec):
 		return sec/60
+
+	def purge(self):
+		self.seen = None
+		while len(self) != 0:
+			for indx, thing in enumerate(self):
+				del self[indx]
+		
+
 
 class Visitor(object):
 
@@ -79,28 +90,32 @@ class Visitor(object):
 
 
 ### TEST
+if __name__ == "__main__":
+	q = WaitQue()
+	s = Visitor("a", "Travel Signature")
+	s2 = Visitor("b", "Status Change")
+	s3 = Visitor("b", "Status Change")
+	q.add(s)
+	q.add(s2)
+	q.add(s3)
+	assert s in q
+	assert s.enter_time
+	import time
+	get = q.get_next()
+	assert s.exit_time
+	assert get is s
+	assert q.avg_wait() > 0
+	c = q.get_reasons()
+	assert c['Status Change'] == 2
+	assert q._get_reason_wait("Travel Signature") == 5*60
+	s = Visitor("a", "Travel Signature")
+	q.add(s)
+	s = Visitor("a", "Travel Signature")
+	assert q.add(s) > 0
+	q._seen_time_remaining() > 0
+	q.purge()
+	assert q.seen == None
+	assert q == []
+	assert  q.add(s) == 5
 
-q = WaitQue()
-s = Visitor("a", "Travel Signature")
-s2 = Visitor("b", "Status Change")
-s3 = Visitor("b", "Status Change")
-q.add(s)
-q.add(s2)
-q.add(s3)
-assert s in q
-assert s.enter_time
-import time
-get = q.get_next()
-assert s.exit_time
-assert get is s
-assert q.avg_wait() > 0
-c = q.get_reasons()
-assert c['Status Change'] == 2
-assert q._get_reason_wait("Travel Signature") == 5*60
-assert q._get_total_wait() == 72000
-s = Visitor("a", "Travel Signature")
-q.add(s)
-s = Visitor("a", "Travel Signature")
-assert q.add(s) > 0
-assert q._get_total_wait() == 108000
-q._seen_time_remaining() > 0
+

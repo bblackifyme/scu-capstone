@@ -4,6 +4,22 @@
 		"selected_items":
 		[
 			[
+				"get",
+				"getProfilePicUrl"
+			],
+			[
+				"data",
+				"database"
+			],
+			[
+				"get_",
+				"get_reason"
+			],
+			[
+				"WEEK",
+				"WEEKS_COUNTER"
+			],
+			[
 				"clas",
 				"classifier"
 			],
@@ -72,6 +88,26 @@
 	},
 	"file_history":
 	[
+		"/Users/branblack/Documents/Python/scu-capstone/app/waittime.py",
+		"/Users/branblack/Documents/Dev/friendlychat-web/web-start/firebase-messaging-sw.js",
+		"/Users/branblack/Documents/Python/scu-capstone/app/code_logs.log",
+		"/Users/branblack/Documents/Python/scu-capstone/app/codedb2.json",
+		"/Users/branblack/Documents/Python/scu-capstone/app/code_db.py",
+		"/Users/branblack/Documents/Python/scu-capstone/app/client_secrets.json",
+		"/Users/branblack/Documents/Python/scu-capstone/app/weeks_reasons.json",
+		"/Users/branblack/Downloads/index.html",
+		"/Users/branblack/Documents/Python/scu-capstone/app/templates/opt_workshop.html",
+		"/Users/branblack/Documents/Python/scu-capstone/app/templates/cpt_workshop.html",
+		"/Users/branblack/Documents/Python/scu-capstone/app/templates/advisors.html",
+		"/Users/branblack/Documents/Python/scu-capstone/.gitignore",
+		"/Users/branblack/Documents/Python/scu-capstone/app/templates/admin_front_page.html",
+		"/Users/branblack/Documents/Python/scu-capstone/app/templates/check_in.html",
+		"/Users/branblack/Documents/Python/scu-capstone/app/advisors.json",
+		"/Users/branblack/Documents/Python/scu-capstone/app/templates/cpt_opt_selection.html",
+		"/Users/branblack/Documents/Python/scu-capstone/app/templates/main_page.html",
+		"/Users/branblack/Documents/Python/scu-capstone/app/opt_logger.py",
+		"/Users/branblack/Documents/Python/scu-capstone/app/que_seen_logs.log",
+		"/Users/branblack/Documents/Python/scu-capstone/app/templates/log_mgmt.html",
 		"/Users/branblack/Downloads/Estimated Wait Time (3).py",
 		"/Users/branblack/Documents/Python/scu_final/code_db.py",
 		"/Users/branblack/codedb2.json",
@@ -84,7 +120,7 @@
 	],
 	"find":
 	{
-		"height": 24.0
+		"height": 39.0
 	},
 	"find_in_files":
 	{
@@ -122,11 +158,11 @@
 	],
 	"incremental_find":
 	{
-		"height": 38.0
+		"height": 24.0
 	},
 	"input":
 	{
-		"height": 0.0
+		"height": 36.0
 	},
 	"layout":
 	{
